@@ -48,7 +48,9 @@ I set up crontab under root:
 # Previews
 
 OK status: 
+
 ![](figures/OK.png "An OK icon")
 
 NOT so OK status: 
+
 ![](figures/notOK.png  "A not so OK icon")
