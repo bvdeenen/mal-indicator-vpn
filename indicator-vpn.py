@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# Setting up OK and notOK images
-imagefolder="/usr/share/pixmaps/emelfm2/" # To Be Changed
-OK=imagefolder+"permissions.svg"          # To Be Changed
-NOTOK=imagefolder+"user_commands.svg"     # To Be Changed
 
 # python libraries to be loaded
 import gi
@@ -17,6 +13,11 @@ from gi.repository import Gtk as gtk
 gi.require_version('AppIndicator3', '0.1') 
 from gi.repository import AppIndicator3 as appindicator
 from gi.repository import GLib
+
+# Setting up OK and notOK images
+imagefolder="figures" # To Be Changed
+OK=os.path.join(imagefolder, "OK.png")          # To Be Changed
+NOTOK=os.path.join(imagefolder, "notOK.png")     # To Be Changed
 
 class TheCore:
   APPINDICATOR_ID = 'malipivo-openvpn'
@@ -32,31 +33,32 @@ class TheCore:
       gtk.main()
 
   def hlavni(self):
-    self.moje=subprocess.Popen("protonvpn s | grep \"Connected\"", shell=True, stdout=subprocess.PIPE).stdout.read()
+    self.moje = "Connected" in subprocess.getoutput("protonvpn status").split()
+
     if self.moje:
-      self.indicator.set_icon( os.path.abspath(OK) )    # vpn is working well
+      self.indicator.set_icon_full( os.path.abspath(OK), "connected" )    # vpn is working well
     else:
-      self.indicator.set_icon( os.path.abspath(NOTOK) ) # vpn is not working, we are not connected
+      self.indicator.set_icon_full( os.path.abspath(NOTOK), "not connected" ) # vpn is not working, we are not connected
     return self.moje
 
   def updateme(self):
     self.moje=self.hlavni()
     #print(moje)
     if not self.moje:
-      os.system("protonvpn d && protonvpn c NL-FREE#2 -p tcp") # I am not connected, formally disconnect me and try to connect me again.
+      os.system("sudo protonvpn c --cc es") # I am not connected, formally disconnect me and try to connect me again.
       self.hlavni()
     return True
 
   def build_menu(self): # This is a simple menu with one item: quit
       self.menu = gtk.Menu()
-      self.item_quit = gtk.MenuItem('Quit')
+      self.item_quit = gtk.MenuItem(label='Quit')
       self.item_quit.connect('activate', self.quit)
       self.menu.append(self.item_quit)
       self.menu.show_all()
       return self.menu
 
   def quit(self,source): # disconnect vpn when quitting icon
-    os.system("protonvpn d")
+    os.system("sudo protonvpn d")
     gtk.main_quit()
 
 if __name__ == "__main__":
